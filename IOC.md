@@ -37,11 +37,35 @@ public void doloadBeanDefinitions(InputStream inputStream) throws ParserConfigur
        
     }
 ```
-- 解析的结果应该是 反射创建类实例需要的类名，类属性...  解析的结果放在BeanDefinition中，
+- 解析的结果应该是 反射创建类实例需要的类名，类属性...  解析的结果放在BeanDefinition中。
 
 
 #### 问题2：解析完成的数据存在哪里？
+放在 DefaultListableBeanFactory 的 beanDefinitionMap中。
 
+#### 问题3：如何解决循环以来？
+spring不支持构造器循环依赖，prototype范围的循环依赖，只支持setter循环依赖。  
+解决方案
+1. 实例化对象
+2. 将实例化对象加入工厂（就是一个Map）
+3. 再处理对象的每个属性
+```java
+
+ protected Object doCreateBean(String beanName,BeanDefinition beanDefinition) throws Exception {
+        String className = beanDefinition.getClassName();
+        //先创建对象，并将对象放入工厂
+        final Object bean =  Class.forName(className).newInstance();
+        addSingletonFactory(beanName, new ObjectFactory<Object>() {
+            public Object getObject() {
+                return bean;
+            }
+        });
+        //再处理属性
+        applyPropertyValues(bean,beanDefinition);
+        return bean;
+    }
+
+```
 #### 联想
 
 

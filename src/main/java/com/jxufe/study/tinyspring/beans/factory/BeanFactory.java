@@ -7,6 +7,6 @@ package com.jxufe.study.tinyspring.beans.factory;
  **/
 public interface BeanFactory {
 
-    Object getBean(String name);
+    Object getBean(String beanName);
 
 }

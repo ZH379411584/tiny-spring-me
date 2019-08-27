@@ -9,4 +9,17 @@ public class Math implements IMath{
     public int add(Integer a, Integer b) {
         return a+b;
     }
+
+    public void createIMath(){
+        final int c = 0;
+        IMath iMath = new IMath() {
+            public int add(Integer a, Integer b) {
+                return c;
+            }
+        };
+
+
+    }
+
+
 }

@@ -3,4 +3,15 @@
 
     <bean id="math" class="com.jxufe.study.tinyspring.mode.Math"></bean>
 
+    <bean id="helloWorld" class="com.jxufe.study.tinyspring.mode.HelloWorld">
+        <property name="name" value="ZN"/>
+    </bean>
+
+    <bean id="testA" class="com.jxufe.study.tinyspring.mode.TestA">
+        <property ref="testB" name="testB"/>
+    </bean>
+    <bean id="testB" class="com.jxufe.study.tinyspring.mode.TestB">
+        <property ref="testA" name="testA"/>
+    </bean>
+
 </beans>
