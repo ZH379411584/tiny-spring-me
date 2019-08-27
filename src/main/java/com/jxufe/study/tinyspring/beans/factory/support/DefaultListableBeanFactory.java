@@ -1,10 +1,13 @@
 package com.jxufe.study.tinyspring.beans.factory.support;
 
+import com.jxufe.study.tinyspring.beans.PropertyValue;
 import com.jxufe.study.tinyspring.beans.factory.BeanFactory;
 import com.jxufe.study.tinyspring.beans.factory.ObjectFactory;
 import com.jxufe.study.tinyspring.beans.factory.config.BeanDefinition;
+import com.jxufe.study.tinyspring.beans.factory.config.RuntimeBeanReference;
 
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,11 +17,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @Date: 2019-08-26 18:23
  **/
-public abstract class DefaultListableBeanFactory implements BeanFactory,BeanDefinitionRegistry{
+public  class DefaultListableBeanFactory implements BeanFactory,BeanDefinitionRegistry{
 
     private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>(256);
 
-    //本应该在DefaultSingletonBeanRegistry
+    //源码中在DefaultSingletonBeanRegistry类中
     private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>(16);
 
 
@@ -39,7 +42,6 @@ public abstract class DefaultListableBeanFactory implements BeanFactory,BeanDefi
         return bean;
     }
 
-    protected abstract Object doCreateBean(String beanName,BeanDefinition beanDefinition) throws Exception;
 
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         singletonFactories.remove(beanName);
@@ -51,6 +53,7 @@ public abstract class DefaultListableBeanFactory implements BeanFactory,BeanDefi
         singletonFactories.put(beanName,objectFactory);
     }
 
+
     protected Object getSingleton(String beanName){
         ObjectFactory<?> objectFactory = singletonFactories.get(beanName);
         if(null != objectFactory)
@@ -58,5 +61,34 @@ public abstract class DefaultListableBeanFactory implements BeanFactory,BeanDefi
             return objectFactory.getObject();
         }
         return null;
+    }
+
+
+    protected Object doCreateBean(String beanName,BeanDefinition beanDefinition) throws Exception {
+        String className = beanDefinition.getClassName();
+        //先创建对象，并将对象放入工厂
+        final Object bean =  Class.forName(className).newInstance();
+        addSingletonFactory(beanName, new ObjectFactory<Object>() {
+            public Object getObject() {
+                return bean;
+            }
+        });
+        //再处理属性
+        applyPropertyValues(bean,beanDefinition);
+        return bean;
+    }
+
+    public void applyPropertyValues(Object object, BeanDefinition beanDefinition) throws Exception {
+        PropertyValue[] propertyValues = beanDefinition.getPropertyValues().getPropertyValues();
+        for (PropertyValue propertyValue : propertyValues){
+            Object value = propertyValue.getValue();
+            if (RuntimeBeanReference.class.isInstance(value)) {
+                RuntimeBeanReference beanReference = (RuntimeBeanReference) value;
+                value = getBean(beanReference.getBeanName());
+            }
+            Field field = object.getClass().getDeclaredField(propertyValue.getName());
+            field.setAccessible(true);
+            field.set(object, value);
+        }
     }
 }
