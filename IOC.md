@@ -43,7 +43,12 @@ public void doloadBeanDefinitions(InputStream inputStream) throws ParserConfigur
 #### 问题2：解析完成的数据存在哪里？
 放在 DefaultListableBeanFactory 的 beanDefinitionMap中。
 
-#### 问题3：如何解决循环以来？
+
+### 2.生成Bean
+#### 问题1：如何从解析的数据中生成Bean？
+反射生成。
+
+#### 问题2：如何解决循环依赖？
 spring不支持构造器循环依赖，prototype范围的循环依赖，只支持setter循环依赖。  
 解决方案
 1. 实例化对象
@@ -66,18 +71,12 @@ spring不支持构造器循环依赖，prototype范围的循环依赖，只支�
     }
 
 ```
-#### 联想
-
-
-### 2.生成Bean
-#### 问题1：如何从解析的数据中生成Bean？
-#### 问题2：如何解决循环依赖？
-
 
 #### 联想
+
 ## 相关理论
-### BeanFactory 类继承图
-
-##
+### XmlBeanFactory 类继承图
+![XmlBeanFactory](https://github.com/ZH379411584/tiny-spring-me/blob/master/images/XmlBeanFactory%20uml.png)
+## 
 
 

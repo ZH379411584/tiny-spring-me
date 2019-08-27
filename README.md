@@ -8,17 +8,11 @@ tiny-spring是为了学习Spring的而开发的，可以认为是一个Spring的
 # IOC  AOP
 
 ## IOC 部分
-```
-git checkout ioc
 
-```
-
+[IOC](https://github.com/ZH379411584/tiny-spring-me/blob/master/IOC.md)
 
 ## AOP 部分
 
-```
-git checkout aop
-
-```
+[AOP](https://github.com/ZH379411584/tiny-spring-me/blob/master/AOP.md)
 
 
