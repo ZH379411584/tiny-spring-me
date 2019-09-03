@@ -80,15 +80,12 @@ public class NaiveWaiter implements Waiter {
  }
 
 ```
-这些简单的配置就实现了AOP功能，只是做了几件事情？
+这些简单的配置就实现了AOP功能，暂时认为做了两件事情。
 1. 解析了切面GreetingAspect中的增强（Advice），切点表达式。
 2. 为目标对象NaiveWaiter生成了代理，在生成代理的时候需要切点表达式匹配。
 
 
 ## SpringAop要解决的问题 
-
-
-
 
 ### 如何生成代理？
 #### [JDK动态代理，Cglib代理实现](https://github.com/ZH379411584/tiny-spring-me/blob/master/AopImplement.md)
