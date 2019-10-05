@@ -25,6 +25,7 @@ public class AopAllianceTest {
         IMath iMath = (IMath) Proxy.newProxyInstance(math.getClass().getClassLoader(),math.getClass().getInterfaces(),
                 new AopAllianceTest.MathInvocationHandler(new LoggerMethodInterceptor(),math));
         System.out.println(iMath.add(1,2));
+
     }
 
 
@@ -39,7 +40,9 @@ public class AopAllianceTest {
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             System.out.println("before method ");
-            Object result = methodInterceptor.invoke(new MyMethodInvocation(target,method,args));
+            // AopAlliance MethodInterceptor.invoke(MethodInvocation)
+            MethodInvocation methodInvocation = new MyMethodInvocation(target,method,args);
+            Object result = methodInterceptor.invoke(methodInvocation);
             System.out.println("end method and result :"+result);
             return result;
         }

@@ -32,6 +32,7 @@ public class JdkProxyTest {
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             System.out.println("before method ");
+            // jdk method.invoke
             Object result = method.invoke(target,args);
             System.out.println("end method and result :"+result);
             return result;

@@ -7,10 +7,12 @@ package com.jxufe.study.tinyspring.aop.framework;
  **/
 public class ProxyFactory extends AdvisedSupport{
 
-    private AopProxyFactory aopProxyFactory;
+    private AopProxyFactory aopProxyFactory = new DefaultAopProxyFactory();;
+
+    public ProxyFactory() {
+    }
 
     public ProxyFactory(Class<?> ... proxyInterfaces) {
-        aopProxyFactory = new DefaultAopProxyFactory();
         setInterfaces(proxyInterfaces);
     }
 

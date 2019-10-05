@@ -1,9 +1,7 @@
 package com.jxufe.study.tinyspring.reflect;
 
 import com.jxufe.study.tinyspring.mode.Math;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodInterceptor;
-import net.sf.cglib.proxy.MethodProxy;
+import net.sf.cglib.proxy.*;
 import org.junit.Test;
 
 import java.lang.reflect.Method;

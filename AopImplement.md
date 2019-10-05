@@ -1,4 +1,4 @@
-#### JDK动态代理
+### 1. JDK动态代理
 ```java
 import com.jxufe.study.tinyspring.mode.IMath;
 import com.jxufe.study.tinyspring.mode.Math;
@@ -32,7 +32,7 @@ public class JdkProxyTest {
     }
 }
 ```
-#### CgLib代理
+### 2. CgLib代理
 ```java
 import com.jxufe.study.tinyspring.mode.Math;
 import net.sf.cglib.proxy.Enhancer;
@@ -66,7 +66,7 @@ public class CglibProxyTest {
 }
 
 ```
-#### 使用aopalliance JDK动态代理
+### 3. 使用AopAlliance JDK动态代理
 ```java
 import com.jxufe.study.tinyspring.mode.IMath;
 import com.jxufe.study.tinyspring.mode.Math;
@@ -102,6 +102,7 @@ public class AopAllianceTest {
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             System.out.println("before method ");
+            // AopAlliance MethodInterceptor.invoke(MethodInvocation)
             Object result = methodInterceptor.invoke(new MyMethodInvocation(target,method,args));
             System.out.println("end method and result :"+result);
             return result;
@@ -156,3 +157,66 @@ public class AopAllianceTest {
 
 
 ```
+从上面三种实现AOP的代码可以观察到 2.CgLib代理 和 3. AopAlliance JDK动态代理 将切面的逻辑独立出来，查看SpringAop源码后，发现 Spring CgLib代理和Jdk动态代理 的最底层源码便是如此。
+ 
+#### 使用 AopAlliance JDK代理 分析
+##### 主要类
+```java
+public interface MethodInterceptor extends Interceptor {
+	
+    /**
+     * Implement this method to perform extra treatments before and
+     * after the invocation. Polite implementations would certainly
+     * like to invoke {@link Joinpoint#proceed()}.
+     *
+     * @param invocation the method invocation joinpoint
+     * @return the result of the call to {@link
+     * Joinpoint#proceed()}, might be intercepted by the
+     * interceptor.
+     *
+     * @throws Throwable if the interceptors or the
+     * target-object throws an exception.  */
+    Object invoke(MethodInvocation invocation) throws Throwable;
+}
+
+
+```
+
+
+##### MethodInvocation类图
+![MethodInvocation](https://github.com/ZH379411584/tiny-spring-me/blob/master/images/MethodInvocation.png)
+```java
+
+public interface MethodInvocation extends Invocation
+{
+
+    /**
+     * Gets the method being called.
+     *
+     * <p>This method is a frienly implementation of the {@link
+     * Joinpoint#getStaticPart()} method (same result).
+     *
+     * @return the method being called.
+     */
+    Method getMethod();
+
+}
+
+
+public interface Joinpoint {
+
+   Object proceed() throws Throwable;
+  //省略
+
+}
+
+```
+
+##### 时序图
+
+![MethodInvocation](https://github.com/ZH379411584/tiny-spring-me/blob/master/images/InvocationHandler_invoke.png)
+
+
+1. MethodInterceptor.invoke();
+2. 执行切面逻辑，比如 在在方法执行前打印日志。
+3. MethodInvocation.proceed();调用方法原本代码，获取执行结果。

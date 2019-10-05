@@ -24,4 +24,17 @@ public class AopTest {
         IMath iMath = (IMath) proxyFactory.getProxy();
         iMath.add(1,2);
     }
+
+    @Test
+    public void testCglibAop() {
+        Math math = new Math();
+        math.add(1,2);
+
+        ProxyFactory proxyFactory = new ProxyFactory();
+        proxyFactory.setTarget(math);
+        proxyFactory.addAdvice(new LoggerBeforeMethodAdive());
+
+        Math mathCglib = (Math) proxyFactory.getProxy();
+        mathCglib.add(1,2);
+    }
 }

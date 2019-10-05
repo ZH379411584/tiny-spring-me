@@ -20,7 +20,8 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory {
 
     private AdvisorAdapterRegister advisorAdapterRegister = new DefaultAdvisorAdapterRegister();
 
-    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(AdvisedSupport config, Method method, Class<?> targetClass) {
+    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(AdvisedSupport config, Method method, Class<?> targetClass)
+    {
         List<Object> interceptor =  new ArrayList<Object>(config.getAdvisors().size());
         Class<?> actualClss = (targetClass != null ? targetClass : method.getDeclaringClass());
 
@@ -28,6 +29,7 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory {
             //
             if(advisor instanceof PointcutAdvisor){
                 //classFilter 和 methodMatch
+
                 MethodInterceptor[] methodInterceptors = advisorAdapterRegister.getInterceptor(advisor);
                 interceptor.addAll(Arrays.asList(methodInterceptors));
             }

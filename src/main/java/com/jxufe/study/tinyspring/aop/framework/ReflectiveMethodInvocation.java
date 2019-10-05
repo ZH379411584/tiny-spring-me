@@ -18,7 +18,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
     protected final Object proxy;
     protected final Object target;
     protected final Method method;
-    protected Object []arguents;
+    protected Object []arguments;
     private final Class<?> targetClass;
     protected final List<?> interceptorsAndDynamicMethodMatchers;
     private int currentInterceptorIndex = -1;
@@ -27,7 +27,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
         this.proxy = proxy;
         this.target = target;
         this.method = method;
-        this.arguents = arguents;
+        this.arguments = arguents;
         this.targetClass = targetClass;
         this.interceptorsAndDynamicMethodMatchers = interceptorsAndDynamicMethodMatchers;
     }
@@ -37,12 +37,12 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
     }
 
     public Object[] getArguments() {
-        return (this.arguents != null ? this.arguents : new Object[0]);
+        return (this.arguments != null ? this.arguments : new Object[0]);
     }
 
     public Object proceed() throws Throwable {
         if(this.currentInterceptorIndex == this.interceptorsAndDynamicMethodMatchers.size() -1 ){
-            return AopUnitls.invokeJoinpoint(this.target,this.method,this.arguents);
+            return invokeJoinpoint();
         }
         Object interceptor = this.interceptorsAndDynamicMethodMatchers.get(++currentInterceptorIndex);
         return ((MethodInterceptor)(interceptor)).invoke(this);
@@ -57,12 +57,15 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
     }
 
     public Object[] getArguents() {
-        return arguents;
+        return arguments;
     }
 
-    public void setArguents(Object[] arguents) {
-        this.arguents = arguents;
+    public void setArguents(Object[] arguments) {
+        this.arguments = arguments;
     }
 
+    protected Object invokeJoinpoint() throws Throwable {
+        return AopUnitls.invokeJoinpointUsingReflection(this.target, this.method, this.arguments);
+    }
 
 }

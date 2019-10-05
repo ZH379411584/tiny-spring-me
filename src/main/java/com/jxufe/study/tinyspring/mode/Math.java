@@ -6,6 +6,9 @@ package com.jxufe.study.tinyspring.mode;
  * @Date: 2019-08-26 22:35
  **/
 public class Math implements IMath{
+    public Math() {
+    }
+
     public int add(Integer a, Integer b) {
         return a+b;
     }
@@ -17,8 +20,6 @@ public class Math implements IMath{
                 return c;
             }
         };
-
-
     }
 
 
