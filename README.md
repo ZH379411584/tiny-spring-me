@@ -5,6 +5,7 @@ tiny-spring是为了学习Spring的而开发的，可以认为是一个Spring的
 ## tingspring资源
 ### [tiny-spring ](https://github.com/code4craft/tiny-spring)   
 ### [tiny-spring理解](https://www.zybuluo.com/dugu9sword/note/382745#tiny-spring-%E5%88%86%E6%9E%90)
+
 # IOC  AOP
 
 ## IOC 部分
@@ -14,5 +15,8 @@ tiny-spring是为了学习Spring的而开发的，可以认为是一个Spring的
 ## AOP 部分
 
 [AOP](https://github.com/ZH379411584/tiny-spring-me/blob/master/AOP.md)
+
+# 其他资料
+### [spring-analysis](https://github.com/seaswalker/spring-analysis)
 
 
