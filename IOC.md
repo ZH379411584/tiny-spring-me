@@ -56,6 +56,7 @@ spring不支持构造器循环依赖，prototype范围的循环依赖，只支�
 2. 将实例化对象加入工厂（就是一个Map）
 3. 再处理对象的每个属性
 ```java
+tiny-spring-me中 DefaultListableBeanFactory类
 
  protected Object doCreateBean(String beanName,BeanDefinition beanDefinition) throws Exception {
         String className = beanDefinition.getClassName();
@@ -73,7 +74,9 @@ spring不支持构造器循环依赖，prototype范围的循环依赖，只支�
 
 ```
 
-#### 联想
+#### 联想  spring源码中如何处理的
+[Spring 源码处理循环依赖](https://github.com/ZH379411584/tiny-spring-me/blob/master/ResolveCircularReferences.md.md)
+
 
 ## 相关理论
 ### XmlBeanFactory 类继承图
