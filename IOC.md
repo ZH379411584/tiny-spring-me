@@ -75,7 +75,7 @@ tiny-spring-me中 DefaultListableBeanFactory类
 ```
 
 #### 联想  spring源码中如何处理的
-[Spring 源码处理循环依赖](https://github.com/ZH379411584/tiny-spring-me/blob/master/ResolveCircularReferences.md.md)
+[Spring 源码处理循环依赖](https://github.com/ZH379411584/tiny-spring-me/blob/master/ResolveCircularReferences.md)
 
 
 ## 相关理论

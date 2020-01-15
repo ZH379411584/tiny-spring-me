@@ -130,9 +130,17 @@ public class B {
     <bean id="b" class="com.daxiyan.study.spring.model.B">
         <property name="a" ref="a"/>
     </bean>
+    
+    
+     @Test
+        public void test() throws Exception {
+            ApplicationContext applicationContext = new ClassPathXmlApplicationContext("spring-circular.xml");
+            A a = (A) applicationContext.getBean("a");
+    
+        }
 
 ```
-getSingleton，addSingletonFactory，addSingleton  方法调用如下表。注意：
+调用 getSingleton，addSingletonFactory，addSingleton 的顺序以及调用 方法后 三条流水线中的元素 如下表。注意：
 省略了getSingleton 条件 (singletonObject == null && isSingletonCurrentlyInCreation(beanName) 不成立时的情况
 
 action | singletonFactories  | earlySingletonObjects | singletonObjects
@@ -140,7 +148,7 @@ action | singletonFactories  | earlySingletonObjects | singletonObjects
 addSingletonFactory(A)  | A | null | null
 addSingletonFactory(B)  | AB | null | null
 getSingleton(A) | B | A | null
-getSingleton(B) | B | A | null
+getSingleton(B) | B | A | null  （allowEarlyReference为false）
 addSingleton(B) | null | A | B
-getSingleton(A) | B | A（直接返回） | null
+getSingleton(A) | B | A  （earlySingletonObjects存在直接返回）| null 
 addSingleton(A) | null | null | AB
