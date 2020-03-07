@@ -89,23 +89,99 @@ public class NaiveWaiter implements Waiter {
 
 ### 如何生成代理？
 #### [JDK动态代理，Cglib代理实现](https://github.com/ZH379411584/tiny-spring-me/blob/master/AopImplement.md)
-暂时不考虑解析切面，使用编码传入增强（Advice）。
+
+tiny-spring-me 暂时不考虑解析切面，使用编码传入增强（Advice）。
 ```java 
-        Waiter waiter = new NaiveWaiter();
-        //前置增强
-        BeforeAdvice beforeAdvice = new GreetingBeforeAdvice();
-        //
-        AfterReturningAdvice afterReturningAdvice = new GreetingAfterAdvice();
-        ProxyFactory proxyFactory = new ProxyFactory();
-        //设置织入目标
-        proxyFactory.setTarget(waiter);
-        proxyFactory.addAdvice(beforeAdvice);
-        proxyFactory.addAdvice(afterReturningAdvice);
-        waiter = (Waiter) proxyFactory.getProxy();
-        waiter.greetTo("mindong");
+Waiter waiter = new NaiveWaiter();
+//前置增强
+BeforeAdvice beforeAdvice = new GreetingBeforeAdvice();
+//
+AfterReturningAdvice afterReturningAdvice = new GreetingAfterAdvice();
+ProxyFactory proxyFactory = new ProxyFactory();
+//设置织入目标
+proxyFactory.setTarget(waiter);
+proxyFactory.addAdvice(beforeAdvice);
+proxyFactory.addAdvice(afterReturningAdvice);
+waiter = (Waiter) proxyFactory.getProxy();
+waiter.greetTo("mindong");
 ```
 ### 什么时候生成代理类？
+在Bean的生命周期时，如果BeanFactory装配了BeanPostProcessor的话，在Bean初始化的过程中，会对对进行加工操作。spring框架中org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator 这个类就是实现AOP代理功能的。
 
+```
+@Override
+	public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) throws BeansException {
+		Object cacheKey = getCacheKey(beanClass, beanName);
+
+		if (beanName == null || !this.targetSourcedBeans.contains(beanName)) {
+			if (this.advisedBeans.containsKey(cacheKey)) {
+				return null;
+			}
+			if (isInfrastructureClass(beanClass) || shouldSkip(beanClass, beanName)) {
+				this.advisedBeans.put(cacheKey, Boolean.FALSE);
+				return null;
+			}
+		}
+
+		// Create proxy here if we have a custom TargetSource.
+		// Suppresses unnecessary default instantiation of the target bean:
+		// The TargetSource will handle target instances in a custom fashion.
+		if (beanName != null) {
+			TargetSource targetSource = getCustomTargetSource(beanClass, beanName);
+			if (targetSource != null) {
+				this.targetSourcedBeans.add(beanName);
+				Object[] specificInterceptors = getAdvicesAndAdvisorsForBean(beanClass, beanName, targetSource);
+				Object proxy = createProxy(beanClass, beanName, specificInterceptors, targetSource);
+				this.proxyTypes.put(cacheKey, proxy.getClass());
+				return proxy;
+			}
+		}
+
+		return null;
+	}
+```
 ### 如何保证多种Advice的调用顺序？
+排序代码
+```
+类org.springframework.aop.aspectj.annotation.ReflectiveAspectJAdvisorFactory
 
-### 
+private static final Comparator<Method> METHOD_COMPARATOR;
+
+	static {
+		CompoundComparator<Method> comparator = new CompoundComparator<Method>();
+		comparator.addComparator(new ConvertingComparator<Method, Annotation>(
+				new InstanceComparator<Annotation>(
+						Around.class, Before.class, After.class, AfterReturning.class, AfterThrowing.class),
+				new Converter<Method, Annotation>() {
+					@Override
+					public Annotation convert(Method method) {
+						AspectJAnnotation<?> annotation =
+								AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(method);
+						return (annotation != null ? annotation.getAnnotation() : null);
+					}
+				}));
+		comparator.addComparator(new ConvertingComparator<Method, String>(
+				new Converter<Method, String>() {
+					@Override
+					public String convert(Method method) {
+						return method.getName();
+					}
+				}));
+		METHOD_COMPARATOR = comparator;
+	}
+       
+private List<Method> getAdvisorMethods(Class<?> aspectClass) {
+		final List<Method> methods = new LinkedList<Method>();
+		ReflectionUtils.doWithMethods(aspectClass, new ReflectionUtils.MethodCallback() {
+			@Override
+			public void doWith(Method method) throws IllegalArgumentException {
+				// Exclude pointcuts
+				if (AnnotationUtils.getAnnotation(method, Pointcut.class) == null) {
+					methods.add(method);
+				}
+			}
+		});
+		Collections.sort(methods, METHOD_COMPARATOR);
+		return methods;
+	}
+```
