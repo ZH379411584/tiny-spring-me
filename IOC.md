@@ -50,18 +50,29 @@ public void doloadBeanDefinitions(InputStream inputStream) throws ParserConfigur
 根据BeanDefinition中的类名，类属性 反射生成。
 
 #### 问题2：如何解决循环依赖？
+```
+A与B互相依赖的基本过程是这样。
+A a = new A();
+B b = new B();
+a.b = b;
+b.a = a;
+```
+
 spring不支持构造器循环依赖，prototype范围的循环依赖，只支持setter循环依赖。    
-解决方案
+tiny-spring-me的解决方案
 1. 实例化对象
-2. 将实例化对象加入工厂（就是一个Map）
-3. 再处理对象的每个属性
+2. 将实例化对象加入一个singletonFactories中。
+3. 再处理对象的每个属性，如果属性是某个对象，则先在singletonFactories中寻找，如果存在，则使用singletonFactories保存的对象。如果没有，则创建该Bean。
 ```java
 tiny-spring-me中 DefaultListableBeanFactory类
 
+private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<String, ObjectFactory<?>>(16);
+
  protected Object doCreateBean(String beanName,BeanDefinition beanDefinition) throws Exception {
         String className = beanDefinition.getClassName();
-        //先创建对象，并将对象放入工厂
+       
         final Object bean =  Class.forName(className).newInstance();
+        //先创建对象，并将对象放入工厂
         addSingletonFactory(beanName, new ObjectFactory<Object>() {
             public Object getObject() {
                 return bean;
@@ -71,10 +82,39 @@ tiny-spring-me中 DefaultListableBeanFactory类
         applyPropertyValues(bean,beanDefinition);
         return bean;
     }
+   protected void addSingletonFactory(String beanName,ObjectFactory<?> objectFactory){
+        singletonFactories.put(beanName,objectFactory);
+    }
+    
+   public Object getBean(String beanName)  {
+        BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
+        if(null == beanDefinition){
+            throw new IllegalArgumentException("No bean named "+beanName+" is defined");
+        }
+        //从singletonFactories中查找
+        Object bean = getSingleton(beanName);
+        if(null == bean){
+            try {
+                 bean = doCreateBean(beanName,beanDefinition);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("create bean exception "+e.getMessage());
+            }
+        }
+        return bean;
+   }
+   protected Object getSingleton(String beanName){
+        ObjectFactory<?> objectFactory = singletonFactories.get(beanName);
+        if(null != objectFactory)
+        {
+            return objectFactory.getObject();
+        }
+        return null;
+    }
 
 ```
 
-#### 联想  spring源码中如何处理的
+#### Spring 源码处理循环依赖
 [Spring 源码处理循环依赖](https://github.com/ZH379411584/tiny-spring-me/blob/master/ResolveCircularReferences.md)
 
 
@@ -83,7 +123,6 @@ tiny-spring-me中 DefaultListableBeanFactory类
 ![XmlBeanFactory](https://github.com/ZH379411584/tiny-spring-me/blob/master/images/XmlBeanFactory_uml.png)
 
 
-## 
 
 
 
